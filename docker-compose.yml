@@ -1,0 +1,30 @@
+services:
+  social-service:
+    build: .
+    ports:
+      - "3024:3024"
+    environment:
+      - PORT=3024
+      - SERVICE_API_KEY=${SERVICE_API_KEY:-dev-key-change-me}
+      - DATABASE_URL=postgresql://social_user:social_pass@postgres:5432/social
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: social_user
+      POSTGRES_PASSWORD: social_pass
+      POSTGRES_DB: social
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U social_user -d social"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:

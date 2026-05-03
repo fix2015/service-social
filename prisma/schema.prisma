@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  contentId String   @map("content_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, contentId])
+  @@index([contentId])
+  @@map("likes")
+}
+
+model Comment {
+  id        String        @id @default(cuid())
+  userId    String        @map("user_id")
+  contentId String        @map("content_id")
+  text      String
+  createdAt DateTime      @default(now()) @map("created_at")
+  likes     CommentLike[]
+
+  @@index([contentId, createdAt])
+  @@map("comments")
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  commentId String   @map("comment_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+  @@map("comment_likes")
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String   @map("follower_id")
+  followingId String   @map("following_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String   @map("blocker_id")
+  blockedId String   @map("blocked_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([blockerId, blockedId])
+  @@map("blocks")
+}
+
+model Save {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  contentId String   @map("content_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, contentId])
+  @@map("saves")
+}
